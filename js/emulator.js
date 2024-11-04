@@ -108,8 +108,9 @@
 		for (var i in buttonsMapping) {
 			(function (key) {
 				var button = keypad.querySelector('#' + i);
-				button.addEventListener('touchstart', function() {
+				button.addEventListener('click', function() {
 					js2me.sendKeyPressEvent(key);
+					js2me.sendKeyReleasedEvent(key);
 				});
 				button.addEventListener('touchend', function() {
 					js2me.sendKeyReleasedEvent(key);

@@ -45,21 +45,30 @@ js2me.createClass({
 		this.element.height = js2me.config.height;
 		//this.element.setAttribute('moz-opaque', '');
 		var canvas = this;
-		this.element.addEventListener('DOMNodeInserted', function () {
-			js2me.addEventListener('keypress', canvas.keyPressListener);
-			js2me.addEventListener('keyreleased', canvas.keyReleasedListener);
-			js2me.launchThread(function () {
-				canvas.$repaint$$V();
-				canvas.$showNotify$$V();
-			});
-		});
-		this.element.addEventListener('DOMNodeRemoved', function () {
-			js2me.removeEventListener('keypress', canvas.keyPressListener);
-			js2me.removeEventListener('keyreleased', canvas.keyReleasedListener);
-			js2me.launchThread(function () {
-				canvas.$hideNotify$$V();
-			});
-		});
+		// // Replacement mutation observer code:
+		// const observer = new MutationObserver(mutationList =>
+		// 	mutationList.filter(m => m.type === 'childList').forEach(m => {
+		// 		m.addedNodes.forEach(function () {
+		//
+		// 		});
+		// 	}));
+		// observer.observe(this.element,{childList: true, subtree: true});
+
+		// this.element.addEventListener('DOMNodeInserted', function () {
+		// 	js2me.addEventListener('keypress', canvas.keyPressListener);
+		// 	js2me.addEventListener('keyreleased', canvas.keyReleasedListener);
+		// 	js2me.launchThread(function () {
+		// 		canvas.$repaint$$V();
+		// 		canvas.$showNotify$$V();
+		// 	});
+		// });
+		// this.element.addEventListener('DOMNodeRemoved', function () {
+		// 	js2me.removeEventListener('keypress', canvas.keyPressListener);
+		// 	js2me.removeEventListener('keyreleased', canvas.keyReleasedListener);
+		// 	js2me.launchThread(function () {
+		// 		canvas.$hideNotify$$V();
+		// 	});
+		// });
 		this.keyPressListener = function (keyCode) {
 			var gameCode = canvas.gameActionMapping[keyCode];
 			if (gameCode != null) {
@@ -109,6 +118,12 @@ js2me.createClass({
 		this.element.addEventListener('mousemove', mouseHandler);
 		this.keysState = [];
 		this.gameState = 0;
+		js2me.addEventListener('keypress', canvas.keyPressListener);
+		js2me.addEventListener('keyreleased', canvas.keyReleasedListener);
+		js2me.launchThread(function () {
+			canvas.$repaint$$V();
+			canvas.$showNotify$$V();
+		});
 		this.init();
 	},
 	/*

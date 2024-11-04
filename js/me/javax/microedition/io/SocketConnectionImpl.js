@@ -31,6 +31,14 @@ js2me.createClass({
 	/*
 	 * public InputStream openInputStream() throws IOException
 	 */
-	
+	$openInputStream$$Ljava_io_InputStream_:function (){
+		return this.inputStream;
+	},
+	/*
+	 * public OutputStream openOutputStream() throws IOException
+	 */
+	$openOutputStream$$Ljava_io_OutputStream_:function (){
+		return this.outputStream;
+	},
 	interfaces: ['javaRoot.$javax.$microedition.$io.$SocketConnection']
 });
