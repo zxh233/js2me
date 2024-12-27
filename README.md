@@ -85,6 +85,8 @@ Somewhere in future...
  * JavaWorker
  * pass Microemu unit tests
 
+访问URL 末尾加 &src=jars/kdjl2.jar
+
 Thanks
 -----------
 [Zip.js](https://github.com/gildas-lormeau/zip.js)
