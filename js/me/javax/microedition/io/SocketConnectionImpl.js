@@ -1,44 +1,130 @@
 js2me.createClass({
 	construct: function (host, port) {
-		this.socket = navigator.mozTCPSocket.open(host, port, {binaryType: 'arraybuffer'});
-		var parent = this;
-		this.socket.ondata = function (event) {
-			parent.inputStream.buffer.push(event.data);
+		host = host.replace('//', '');
+		var Socket;
+		if (false) {
+			Socket = require('net').Socket;
+		} else if (true) {
+			function _instanceof (left, right) { if (right != null && typeof Symbol !== "undefined" && right[Symbol.hasInstance]) { return !!right[Symbol.hasInstance](left); } else { return left instanceof right; } }
+
+			function _classCallCheck (instance, Constructor) { if (!_instanceof(instance, Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+			function _defineProperties (target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+			function _createClass (Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+			Socket = /*#__PURE__*/function () {
+				function Socket () {
+					_classCallCheck(this, Socket);
+
+					this.listeners = {};
+				}
+
+				_createClass(Socket, [{
+					key: "connect",
+					value: function connect (port, host) {
+						var _this = this;
+
+						this.id = evalNative('connectSocket', {
+							port: port,
+							host: host,
+							timeout: 1e3 * 3
+						});
+						evalNative('onSocket', {
+							id: this.id
+						}, function (result) {
+							var event = result.event;
+							var data = result.data ? Buffer.from(result.data, 'base64') : undefined;
+							var listeners = _this.listeners[event] || [];
+							listeners.forEach(function (listener) {
+								if (typeof listener === 'function') {
+									listener(data);
+								}
+							});
+						}, true);
+					}
+				}, {
+					key: "on",
+					value: function on (event, listener) {
+						var listeners = this.listeners[event] = this.listeners[event] || [];
+						listeners.push(listener);
+					}
+				}, {
+					key: "write",
+					value: function write (buffer) {
+						evalNative('invokeSocket', {
+							id: this.id,
+							method: 'write',
+							data: Buffer.from(buffer).toString('base64')
+						});
+					}
+				}, {
+					key: "destroy",
+					value: function destroy () {
+						evalNative('invokeSocket', {
+							id: this.id,
+							method: 'destroy'
+						});
+					}
+				}]);
+
+				return Socket;
+			}();
+		}
+
+		var socket = this.socket = new Socket();
+		var self = this;
+		socket.connect(port, host);
+		js2me.isThreadSuspended = true;
+		var threadId = js2me.currentThread;
+		var error;
+		var connected;
+		js2me.restoreStack[threadId] = [function () {
+			if (error) {
+				throw error;
+			}
+			return self;
+		}];
+		socket.on('data', function (data) {
+			self.inputStream.push(data);
+		});
+		socket.on('connect', function () {
+			connected = true;
+			js2me.restoreThread(threadId);
+		});
+		socket.on('error', function () {
+			error = new javaRoot.$java.$io.$IOException();
+			if (!connected) {
+				js2me.restoreThread(threadId);
+			}
+		});
+		socket.on('close', function () {
+			self.inputStream.push(null, true);
+		});
+		this.inputStream = new javaRoot.$java.$io.$DynamicInputStream();
+		var outputStream = this.outputStream = new javaRoot.$java.$io.$OutputStream();
+		outputStream.buffer = [];
+		outputStream.$write$I$V = function (byte) {
+			this.ensureOpen();
+			this.buffer.push(byte);
 		};
-		this.inputStream = new javaRoot.$java.$io.$InputStream();
-		this.inputStream.buffer = [];
-		this.inputStream.position = 0;
-		this.inputStream.$read$$I = function () {
-			if (this.buffer.length === 0) {
-				return -1;
+		outputStream.$flush$$V = function () {
+			if (this.buffer.length) {
+				var data = new Uint8Array(this.buffer);
+				this.buffer = [];
+				socket.write(data);
 			}
-			if (this.position >= this.buffer[0].length) {
-				this.buffer.shift();
-				this.position = 0;
-			}
-			if (this.buffer.length === 0) {
-				return -1;
-			}
-			return this.buffer[0][this.position++];
-		};
-		this.outputStream = new javaRoot.$java.$io.$OutputStream();
-		this.outputStream.buffer = new Uint8Array(1);
-		this.outputStream.$write$I$V = function (byte) {
-			this.buffer[0] = byte;
-			parent.socket.send(this.buffer);
 		};
 	},
-	/*
-	 * public InputStream openInputStream() throws IOException
-	 */
-	$openInputStream$$Ljava_io_InputStream_:function (){
+	$openInputStream$$Ljava_io_InputStream_: function () {
 		return this.inputStream;
 	},
-	/*
-	 * public OutputStream openOutputStream() throws IOException
-	 */
-	$openOutputStream$$Ljava_io_OutputStream_:function (){
+	$openOutputStream$$Ljava_io_OutputStream_: function () {
 		return this.outputStream;
 	},
-	interfaces: ['javaRoot.$javax.$microedition.$io.$SocketConnection']
+	$close$$V: function () {
+		this.socket.destroy();
+	},
+	interfaces: ['javaRoot.$javax.$microedition.$io.$SocketConnection'],
+	require: ['javaRoot.$java.$io.$DynamicInputStream']
 });

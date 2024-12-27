@@ -4,15 +4,15 @@ js2me.createClass({
 	 */
 	$open$Ljava_lang_String_$Ljavax_microedition_io_Connection_: function (url) {
 		var parts = url.text.split(':');
+		if (parts[0] === 'http') {
+			return new javaRoot.$javax.$microedition.$io.$HttpConnectionImpl(url.text);
+		}
 		if (parts[0] === 'socket') {
-			return new javaRoot.$javax.$microedition.$io.$SocketConnectionImpl(parts[1].substring(2), parseInt(parts[2]));
+			return new javaRoot.$javax.$microedition.$io.$SocketConnectionImpl(parts[1], parseInt(parts[2]));
 		}
-		// if (parts[0] === 'http') {
-		// 	return new javaRoot.$javax.$microedition.$io.$SocketConnectionImpl(parts[1], parseInt(parts[2]));
+		// if (parts[0] === 'localmsg') {
+		// 	return new javaRoot.$com.$nokia.$mid.$s40.$io.$LocalMessageProtocolConnection(parts[1]);
 		// }
-		if (parts[0] === 'localmsg') {
-			return new javaRoot.$com.$nokia.$mid.$s40.$io.$LocalMessageProtocolConnection(parts[1]);
-		}
 		if (parts[0] === 'file') {
 			return new javaRoot.$javax.$microedition.$io.$file.$FileConnectionImpl(parts[1], parts[2]);
 		}
@@ -24,7 +24,10 @@ js2me.createClass({
 	$open$Ljava_lang_String_IZ$Ljavax_microedition_io_Connection_: function (url) {
 		return this.$open$Ljava_lang_String_$Ljavax_microedition_io_Connection_(url);
 	},
-	require: ['javaRoot.$javax.$microedition.$io.$file.$FileConnectionImpl', 'javaRoot.$com.$nokia.$mid.$s40.$io.$LocalMessageProtocolConnection','javaRoot.$javax.$microedition.$io.$SocketConnectionImpl']
+	require: [
+		'javaRoot.$javax.$microedition.$io.$HttpConnectionImpl',
+		'javaRoot.$javax.$microedition.$io.$SocketConnectionImpl',
+		'javaRoot.$javax.$microedition.$io.$file.$FileConnectionImpl',
+		// 'javaRoot.$com.$nokia.$mid.$s40.$io.$LocalMessageProtocolConnection'
+	]
 });
-	
-
